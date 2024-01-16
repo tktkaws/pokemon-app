@@ -1,29 +1,45 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import { getAllPokemon } from './utils/pokemon';
+import { getAllPokemon, getPokemon } from './utils/pokemon';
+import Card from './componets/Card';
 
 function App() {
   const initialURL = "https://pokeapi.co/api/v2/pokemon";
   const [loading, setLoading] = useState(true);
+  const [pokemonData, setPokemonData] = useState([]);
 
   useEffect(() => {
     const fetchPokemonData = async() => {
       // すべてのポケモンデータを取得
       let res = await getAllPokemon(initialURL);
-      console.log(res);
+      loadPokemon(res.results);
       setLoading(false);
     };
     fetchPokemonData();
 
   },[]);
+
+  const loadPokemon = async (data) => {
+    let _pokemonData = await Promise.all(data.map((pokemon) => {
+      let pokemonRecord = getPokemon(pokemon.url);
+      return pokemonRecord;
+    }))
+    setPokemonData(_pokemonData); 
+  };
+
+  console.log(pokemonData);
   return (
     <div className="App">
       {loading ? (
         <h1>now loading</h1>
       ) : (
-        <h1>load completed</h1>
+        <div className='pokemonCardContainer'>
+          {pokemonData.map((pokemon,i) => {
+            return <Card key={i} pokemon={pokemon}/>
+          })}
+
+        </div>
       )}
-      <h1>pokemon</h1>
     </div>
   );
 }
